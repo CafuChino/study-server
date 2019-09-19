@@ -14,6 +14,20 @@ function makeLoginSql(req,callback) {
     };
     callback(sql)
 }
+function logAdmin(req,info) {
+    db.mysqlDate((date,time)=>{
+        sql = `INSERT INTO log_admin (date,time,admin,info,ip) VALUES (${date},${time},${mysql.escape(req.body.username)},${mysql.escape(info)},${mysql.escape(req.ip)})`;
+        db.query(sql,(err,rows)=>{
+        })
+    })
+}
+function logLogout(req,name,info) {
+    db.mysqlDate((date,time)=>{
+        sql = `INSERT INTO log_admin (date,time,admin,info,ip) VALUES (${date},${time},${mysql.escape(name)},${mysql.escape(info)},${mysql.escape(req.ip)})`;
+        db.query(sql,(err,rows)=>{
+        })
+    })
+}
 function loginCheck(req, callback) {
     var password = req.body.password;
     makeLoginSql(req,function(sql) {
@@ -32,9 +46,11 @@ function loginCheck(req, callback) {
                     status = false;
                 }
             }
-            callback(err,status);
+            return callback(err,status,rows[0]);
         });
     })
 }
 
-exports.loginCheck = loginCheck
+exports.loginCheck = loginCheck;
+exports.logAdmin = logAdmin;
+exports.logLogout = logLogout;
