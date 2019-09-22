@@ -27,15 +27,61 @@ router.post('/add', function (req, res, next) {
   } else {
     return res.json({
       code: 400,
-      ret_msg: '会话过期或状态异常，请重新登陆！'
+      err_msg: '会话过期或状态异常，请重新登陆！'
     })
   }
 });
-router.post('/del', function (req, res, next) {
-  res.send('respond with a resource');
-});
 router.post('/freeze', function (req, res, next) {
-  res.send('respond with a resource');
+  user.freezeUserStudent(req,(err)=>{
+    if (err) {
+      log.primaryAdminLog(req,`冻结/解冻用户${mysql.escape(req.body.uuid)},操作失败,信息:${mysql.escape(err)}。`);
+      return res.json({
+        code:500,
+        err_msg:err
+      })
+    }else{
+      log.primaryAdminLog(req,`冻结/解冻用户${mysql.escape(req.body.uuid)},操作成功。`);
+      return res.json({
+        code:200,
+        ret_msg:"操作成功"
+      })
+    }
+  })
 });
-
+router.get('/basic',(req,res,next)=>{
+  user.getStudentBasic(req,(err,rows)=>{
+    if (err) {
+      log.primaryAdminLog(req,`查询${JSON.stringify(req.query)}失败：${err}`)
+      return res.json({
+        code:500,
+        err_msg:err
+      })
+    }else{
+      log.primaryAdminLog(req,`查询${JSON.stringify(req.query)}成功`)
+      return res.json({
+        code:200,
+        ret_msg:"查询成功",
+        row_msg:rows
+      })
+    }
+  })
+});
+router.get('/meta',(req,res,next)=>{
+  user.getStudentMeta(req,(err,rows)=>{
+    if (err) {
+      log.primaryAdminLog(req,`查询${JSON.stringify(req.query)}失败：${err}`)
+      return res.json({
+        code:500,
+        err_msg:err
+      })
+    }else{
+      log.primaryAdminLog(req,`查询${JSON.stringify(req.query)}成功`)
+      return res.json({
+        code:200,
+        ret_msg:"查询成功",
+        row_msg:rows
+      })
+    }
+  })
+})
 module.exports = router;
