@@ -7,9 +7,13 @@ const uuidv1 = require('uuid/v1');
 function addUserStudent(req, callback) {
     db.mysqlDate((date, time) => {
         if (req.body.name && req.body.gender) {
-            let cardID = '', unit = '', className = '', classID = '', tel = '', er_tel = '', addr = '';
+            let cardID = '', unit = '', className = '', classID = '', tel = '', er_tel = '', addr = '', balance_credit = 0, balance_time = 0;
             let name = mysql.escape(waf.strictCheck(req.body.name));
             let admin = mysql.escape(req.session.loginUser);
+            balance_time = mysql.escape(req.body.balance_time);
+            balance_credit = mysql.escape(req.body.balance_credit);
+            let circle = mysql.escape(req.body.circle);
+            let expire = mysql.escape(req.body.expire);
             let gender = req.body.gender;
             let uuid = mysql.escape(uuidv1());
             let reg_time = date.toString() + time.toString();
@@ -20,14 +24,20 @@ function addUserStudent(req, callback) {
             if (req.body.tel) { tel = mysql.escape(req.body.tel) };
             if (req.body.er_tel) { er_tel = mysql.escape(req.body.er_tel) };
             if (req.body.addr) { addr = mysql.escape(waf.primaryCheck(req.body.addr)) };
-            let sql1 = `INSERT INTO student_meta (uuid,cardID,reg_admin,reg_time) VALUES (${uuid},${cardID},${admin},${reg_time})`
+            let sql1 = `INSERT INTO student_meta (uuid,cardID,reg_admin,reg_time) VALUES (${uuid},${cardID},${admin},${reg_time})`;
             let sql2 = `INSERT INTO student_basic (uuid,name,gender,unit,className,classID,tel,er_tel,addr) VALUES (${uuid},${name},${gender},${unit},${className},${classID},${tel},${er_tel},${addr})`;
+            let sql3 = `INSERT INTO student_money (uuid,balance_time,balance_credit,circle,expire) VALUES (${uuid},${balance_time},${balance_credit},${circle},${expire})`;
             db.query(sql1, function (err, rows) {
                 if (err) {
                     return callback(err, rows)
                 }
                 db.query(sql2, (err, rows) => {
-                    return callback(err, rows)
+                    if (err) {
+                        return callback(err, rows)
+                    }
+                    db.query(sql3, function (err, rows) {
+                        return callback(err, rows)
+                    })
                 })
             })
         } else {
@@ -37,7 +47,7 @@ function addUserStudent(req, callback) {
     })
 };
 function freezeUserStudent(req, callback) {
-    if (req.session.access >= 2&&req.session.logged) {
+    if (req.session.access >= 2 && req.session.logged &&req.body.secret==req.session.secret) {
         if (!req.body.uuid) {
             let err = 'Request Error';
             return callback(err);
@@ -71,7 +81,7 @@ function freezeUserStudent(req, callback) {
     }
 };
 function getStudentBasic(req, callback) {
-    if (!req.session.logged||!req.session.loginUser||!req.session.access) {
+    if (!req.session.logged || !req.session.loginUser || !req.session.access) {
         let err = "Access Denied";
         return callback(err)
     }
@@ -92,7 +102,7 @@ function getStudentBasic(req, callback) {
     })
 }
 function getStudentMeta(req, callback) {
-    if (!req.session.logged||!req.session.loginUser||!req.session.access) {
+    if (!req.session.logged || !req.session.loginUser || !req.session.access) {
         let err = "Access Denied";
         return callback(err)
     }

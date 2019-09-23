@@ -12,6 +12,7 @@ var logRouter = require('./routes/log');
 var authRouter = require('./routes/auth');
 var moneyRouter = require('./routes/money');
 var statusRouter = require('./routes/status');
+var basicRouter = require('./routes/basic');
 
 var app = express();
 var identityKey = 'skey';
@@ -39,5 +40,6 @@ app.use('/log', logRouter);
 app.use('/auth', authRouter);
 app.use('/money', moneyRouter);
 app.use('/status', statusRouter);
+app.use('/basic',basicRouter);
 
 module.exports = app;
