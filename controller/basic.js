@@ -1,6 +1,8 @@
 let mysql = require('mysql');
 var db = require("../config/db");
 
+
+
 function basicSign(req, callback) {
     if (!req.session.logged || !req.session.loginUser||req.session.logged ==null) {
         return callback("Session Failed");

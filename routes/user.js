@@ -84,4 +84,19 @@ router.get('/meta',(req,res,next)=>{
     }
   })
 })
+router.get('/information',(req,res,next)=>{
+  user.getStudentInformation(req,(err,money,meta)=>{
+    if (err) {
+      return res.json({
+        code:500,
+        err:err
+      })
+    };
+    return res.json({
+      code:200,
+      money: money,
+      meta:meta
+    })
+  })
+})
 module.exports = router;

@@ -7,7 +7,15 @@ const uuidv1 = require('uuid/v1');
 function addUserStudent(req, callback) {
     db.mysqlDate((date, time) => {
         if (req.body.name && req.body.gender) {
-            let cardID = '', unit = '', className = '', classID = '', tel = '', er_tel = '', addr = '', balance_credit = 0, balance_time = 0;
+            let cardID = '',
+                unit = '',
+                className = '',
+                classID = '',
+                tel = '',
+                er_tel = '',
+                addr = '',
+                balance_credit = 0,
+                balance_time = 0;
             let name = mysql.escape(waf.strictCheck(req.body.name));
             let admin = mysql.escape(req.session.loginUser);
             balance_time = mysql.escape(req.body.balance_time);
@@ -17,13 +25,27 @@ function addUserStudent(req, callback) {
             let gender = req.body.gender;
             let uuid = mysql.escape(uuidv1());
             let reg_time = date.toString() + time.toString();
-            if (req.body.cardID) { cardID = mysql.escape(req.body.cardID); };
-            if (req.body.unit) { unit = mysql.escape(waf.strictCheck(req.body.unit)) };
-            if (req.body.className) { className = mysql.escape(req.body.className) };
-            if (req.body.classID) { classID = mysql.escape(req.body.classID) };
-            if (req.body.tel) { tel = mysql.escape(req.body.tel) };
-            if (req.body.er_tel) { er_tel = mysql.escape(req.body.er_tel) };
-            if (req.body.addr) { addr = mysql.escape(waf.primaryCheck(req.body.addr)) };
+            if (req.body.cardID) {
+                cardID = mysql.escape(req.body.cardID);
+            };
+            if (req.body.unit) {
+                unit = mysql.escape(waf.strictCheck(req.body.unit))
+            };
+            if (req.body.className) {
+                className = mysql.escape(req.body.className)
+            };
+            if (req.body.classID) {
+                classID = mysql.escape(req.body.classID)
+            };
+            if (req.body.tel) {
+                tel = mysql.escape(req.body.tel)
+            };
+            if (req.body.er_tel) {
+                er_tel = mysql.escape(req.body.er_tel)
+            };
+            if (req.body.addr) {
+                addr = mysql.escape(waf.primaryCheck(req.body.addr))
+            };
             let sql1 = `INSERT INTO student_meta (uuid,cardID,reg_admin,reg_time) VALUES (${uuid},${cardID},${admin},${reg_time})`;
             let sql2 = `INSERT INTO student_basic (uuid,name,gender,unit,className,classID,tel,er_tel,addr) VALUES (${uuid},${name},${gender},${unit},${className},${classID},${tel},${er_tel},${addr})`;
             let sql3 = `INSERT INTO student_money (uuid,balance_time,balance_credit,circle,expire) VALUES (${uuid},${balance_time},${balance_credit},${circle},${expire})`;
@@ -46,8 +68,9 @@ function addUserStudent(req, callback) {
         }
     })
 };
+
 function freezeUserStudent(req, callback) {
-    if (req.session.access >= 2 && req.session.logged &&req.body.secret==req.session.secret) {
+    if (req.session.access >= 2 && req.session.logged && req.body.secret == req.session.secret) {
         if (!req.body.uuid) {
             let err = 'Request Error';
             return callback(err);
@@ -80,6 +103,7 @@ function freezeUserStudent(req, callback) {
         return callback(err)
     }
 };
+
 function getStudentBasic(req, callback) {
     if (!req.session.logged || !req.session.loginUser || !req.session.access) {
         let err = "Access Denied";
@@ -101,6 +125,7 @@ function getStudentBasic(req, callback) {
         callback(err, rows)
     })
 }
+
 function getStudentMeta(req, callback) {
     if (!req.session.logged || !req.session.loginUser || !req.session.access) {
         let err = "Access Denied";
@@ -122,7 +147,31 @@ function getStudentMeta(req, callback) {
         callback(err, rows)
     })
 }
+
+function getStudentInformation(req, callback) {
+    if (!req.session.logged || !req.session.loginUser || !req.session.access || !req.query.uuid) {
+        let err = "Access Denied";
+        return callback(err)
+    };
+    const uuid = mysql.escape(req.query.uuid);
+    const sql = `SELECT * FROM student_money WHERE uuid=${uuid}`
+    db.query(sql, (err, rows) => {
+        if (err) {
+            return callback(err);
+        };
+        var money_row = rows
+        let sql = `SELECT * FROM student_meta WHERE uuid=${uuid}`;
+        db.query(sql, (err, rows) => {
+            if (err) {
+                return callback(err);
+            };
+            return callback(err,money_row,rows)
+        })
+    })
+
+}
 exports.addUserStudent = addUserStudent
 exports.freezeUserStudent = freezeUserStudent
 exports.getStudentBasic = getStudentBasic
 exports.getStudentMeta = getStudentMeta
+exports.getStudentInformation = getStudentInformation
