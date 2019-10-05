@@ -149,23 +149,28 @@ function getStudentMeta(req, callback) {
 }
 
 function getStudentInformation(req, callback) {
-    if (!req.session.logged || !req.session.loginUser || !req.session.access || !req.query.uuid) {
+    if (!req.session.logged || !req.session.loginUser || !req.session.access || !req.query.cardID) {
         let err = "Access Denied";
         return callback(err)
     };
-    const uuid = mysql.escape(req.query.uuid);
-    const sql = `SELECT * FROM student_money WHERE uuid=${uuid}`
+    const cardID = mysql.escape(req.query.cardID);
+    let sql = `SELECT * FROM student_meta WHERE cardID=${cardID}`;
     db.query(sql, (err, rows) => {
         if (err) {
             return callback(err);
         };
-        var money_row = rows
-        let sql = `SELECT * FROM student_meta WHERE uuid=${uuid}`;
+        if (rows.length<1) {
+            let err = "Card Error";
+            return callback(err)
+        }
+        var uuid = mysql.escape(rows[0].uuid)
+        const sql = `SELECT * FROM student_money WHERE uuid=${uuid}`
         db.query(sql, (err, rows) => {
             if (err) {
                 return callback(err);
             };
-            return callback(err,money_row,rows)
+            var money_row = rows
+            return callback(err, money_row, rows)
         })
     })
 

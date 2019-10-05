@@ -5,6 +5,15 @@ const log = require("../controller/log")
 var router = express.Router();
 
 /* GET users listing. */
+router.all('*', function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true")
+  res.header("X-Powered-By", ' 3.2.1')
+  res.header("Content-Type", "application/json;charset=utf-8");
+  next();
+});
 router.post('/add', function (req, res, next) {
   if (req.session.logged && req.session.loginUser) {
     user.addUserStudent(req, function (err, rows) {
@@ -96,6 +105,7 @@ router.get('/signcheck', (req, res, next) => {
     var access = true;
     var status = "normal";
     var remain = 0;
+    var uuid = meta[0].uuid
     switch (Number(money.type)) {
       case 0:
         if (money.balance_time <= 0 || !money.balance_time) {
@@ -126,6 +136,7 @@ router.get('/signcheck', (req, res, next) => {
     }
     return res.json({
       code: 200,
+      uuid:uuid,
       type:money.type,
       access:access,
       status:status,

@@ -16,8 +16,15 @@ function makeLoginSql(req,callback) {
 }
 function logAdmin(req,info) {
     db.mysqlDate((date,time)=>{
-        sql = `INSERT INTO log_admin (date,time,admin,info,ip) VALUES (${date},${time},${mysql.escape(req.body.username)},${mysql.escape(info)},${mysql.escape(req.ip)})`;
+        var adminName = "未知"
+        if (req.body.username) {
+            adminName = mysql.escape(req.body.username)
+        }
+        sql = `INSERT INTO log_admin (date,time,admin,info,ip) VALUES (${date},${time},${adminName},${mysql.escape(info)},${mysql.escape(req.ip)})`;
         db.query(sql,(err,rows)=>{
+            if (err) {
+                throw err
+            }
         })
     })
 }
