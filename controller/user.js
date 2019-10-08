@@ -159,10 +159,11 @@ function getStudentInformation(req, callback) {
         if (err) {
             return callback(err);
         };
-        if (rows.length<1) {
+        if (rows.length < 1) {
             let err = "Card Error";
             return callback(err)
         }
+        var meta_rows = rows
         var uuid = mysql.escape(rows[0].uuid)
         const sql = `SELECT * FROM student_money WHERE uuid=${uuid}`
         db.query(sql, (err, rows) => {
@@ -170,13 +171,23 @@ function getStudentInformation(req, callback) {
                 return callback(err);
             };
             var money_row = rows
-            return callback(err, money_row, rows)
+            return callback(err, money_row, meta_rows)
         })
     })
 
+}
+function getCount(req, callback) {
+    if (!req.session.logged || !req.session.loginUser || !req.session.access) {
+        let err = "Access Denied";
+        return callback(err)
+    };
+    db.query('SELECT COUNT(*) AS `count` FROM student_basic UNION ALL SELECT COUNT(*) AS online_num FROM student_meta WHERE `status` = 1 UNION ALL SELECT COUNT(*) FROM `student_meta` WHERE TO_DAYS(reg_time) = TO_DAYS(NOW())',(err,rows)=>{
+        callback(err,rows)
+    })
 }
 exports.addUserStudent = addUserStudent
 exports.freezeUserStudent = freezeUserStudent
 exports.getStudentBasic = getStudentBasic
 exports.getStudentMeta = getStudentMeta
 exports.getStudentInformation = getStudentInformation
+exports.getCount = getCount

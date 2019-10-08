@@ -8,6 +8,7 @@ var router = express.Router();
 router.all('*', function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "http://localhost:8080");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Cache-Control", "no-store");
   res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Credentials", "true")
   res.header("X-Powered-By", ' 3.2.1')
@@ -92,7 +93,7 @@ router.get('/meta', (req, res, next) => {
       })
     }
   })
-})
+});
 router.get('/signcheck', (req, res, next) => {
   user.getStudentInformation(req, (err, money, meta) => {
     if (err) {
@@ -109,39 +110,53 @@ router.get('/signcheck', (req, res, next) => {
     switch (Number(money.type)) {
       case 0:
         if (money.balance_time <= 0 || !money.balance_time) {
-            access = false;
-            status = "Error";
-            break;
-          }
+          access = false;
+          status = "Error";
+          break;
+        }
         if (money.balance_time < 2) {
-          status = "warning";       
+          status = "warning";
         };
-        remain = money.balance_time*money.circle
+        remain = money.balance_time * money.circle
         break;
 
       case 1:
         const curr = new Date();
         const expire = new Date(money.expire);
-        const warn_expire = 1*1000*3600*24
-        if (expire<curr||!expire) {
+        const warn_expire = 1 * 1000 * 3600 * 24
+        if (expire < curr || !expire) {
           access = false;
           status = "Error";
           break;
         }
-        remain = Math.floor((expire-curr)/86400000)
-        if (expire-curr<warn_expire) {
+        remain = Math.floor((expire - curr) / 86400000)
+        if (expire - curr < warn_expire) {
           status = "warning";
         };
         break;
     }
     return res.json({
       code: 200,
-      uuid:uuid,
-      type:money.type,
-      access:access,
-      status:status,
-      remain:remain,
-      online:Boolean(meta[0].status)
+      uuid: uuid,
+      type: money.type,
+      access: access,
+      status: status,
+      remain: remain,
+      online: Boolean(meta[0].status)
+    })
+  })
+});
+router.get('/count',(req,res,next)=>{
+  user.getCount(req,(err,rows)=>{
+    if (err) {
+      return res.json({
+        code:500,
+        err_msg:err
+      })
+    }
+    return res.json({
+      code:200,
+      row_msg:rows
     })
   })
 })
