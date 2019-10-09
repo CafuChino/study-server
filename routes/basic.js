@@ -5,7 +5,8 @@ var router = express.Router();
 
 /* GET home page. */
 router.all('*', function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+    //TODO:上线之前把跨域修复了
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
     res.header("Cache-Control", "no-store");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
