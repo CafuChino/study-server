@@ -15,16 +15,19 @@ function addUserStudent(req, callback) {
                 er_tel = '',
                 addr = '',
                 balance_credit = 0,
-                balance_time = 0;
+                balance_time = 0,
+                type = 0
             let name = mysql.escape(waf.strictCheck(req.body.name));
             let admin = mysql.escape(req.session.loginUser);
             balance_time = mysql.escape(req.body.balance_time);
             balance_credit = mysql.escape(req.body.balance_credit);
+            type = mysql.escape(req.body.type)
             let circle = mysql.escape(req.body.circle);
             let expire = mysql.escape(req.body.expire);
             let gender = req.body.gender;
             let uuid = mysql.escape(uuidv1());
             let reg_time = date.toString() + time.toString();
+            
             if (req.body.cardID) {
                 cardID = mysql.escape(req.body.cardID);
             };
@@ -48,7 +51,7 @@ function addUserStudent(req, callback) {
             };
             let sql1 = `INSERT INTO student_meta (uuid,cardID,reg_admin,reg_time) VALUES (${uuid},${cardID},${admin},${reg_time})`;
             let sql2 = `INSERT INTO student_basic (uuid,name,gender,unit,className,classID,tel,er_tel,addr) VALUES (${uuid},${name},${gender},${unit},${className},${classID},${tel},${er_tel},${addr})`;
-            let sql3 = `INSERT INTO student_money (uuid,balance_time,balance_credit,circle,expire) VALUES (${uuid},${balance_time},${balance_credit},${circle},${expire})`;
+            let sql3 = `INSERT INTO student_money (uuid,type,balance_time,balance_credit,circle,expire) VALUES (${uuid},${type},${balance_time},${balance_credit},${circle},${expire})`;
             db.query(sql1, function (err, rows) {
                 if (err) {
                     return callback(err, rows)
@@ -181,8 +184,8 @@ function getCount(req, callback) {
         let err = "Access Denied";
         return callback(err)
     };
-    db.query('SELECT COUNT(*) AS `count` FROM student_basic UNION ALL SELECT COUNT(*) AS online_num FROM student_meta WHERE `status` = 1 UNION ALL SELECT COUNT(*) FROM `student_meta` WHERE TO_DAYS(reg_time) = TO_DAYS(NOW())',(err,rows)=>{
-        callback(err,rows)
+    db.query('SELECT COUNT(*) AS `count` FROM student_basic UNION ALL SELECT COUNT(*) AS online_num FROM student_meta WHERE `status` = 1 UNION ALL SELECT COUNT(*) FROM `student_meta` WHERE TO_DAYS(reg_time) = TO_DAYS(NOW())', (err, rows) => {
+        callback(err, rows)
     })
 }
 exports.addUserStudent = addUserStudent
